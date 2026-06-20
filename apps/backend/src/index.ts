@@ -1,16 +1,16 @@
-import express from 'express';
+import 'dotenv/config'
+import { createApp } from './app'
+import { connectDB } from './lib/db'
 
-const app = express();
-const PORT = process.env.PORT ?? 4000;
+const PORT = process.env.PORT || 4000
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/marketplace'
 
-app.use(express.json());
+async function main() {
+  await connectDB(MONGODB_URI)
+  const app = createApp()
+  app.listen(PORT, () => {
+    console.log(`Backend running on http://localhost:${PORT}`)
+  })
+}
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
-});
-
-app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
-});
-
-export default app;
+main().catch(console.error)
