@@ -1,2 +1,6 @@
-// @marketplace/shared — common types and utilities
-export * from './types';
+export * from './types/user'
+export * from './types/product'
+export * from './types/transaction'
+export * from './schemas/user'
+export * from './schemas/product'
+export * from './schemas/transaction'
