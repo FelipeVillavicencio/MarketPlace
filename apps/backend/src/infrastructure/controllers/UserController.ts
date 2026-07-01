@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
 import { MongoUserRepository } from '../repositories/MongoUserRepository'
-import { MongoProductRepository } from '../repositories/MongoProductRepository'
 import { AuthService } from '../services/AuthService'
 import { CreateUserUseCase } from '../../application/use-cases/users/CreateUser'
 import { GetUsersUseCase } from '../../application/use-cases/users/GetUsers'
