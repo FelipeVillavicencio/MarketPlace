@@ -1,6 +1,6 @@
 import slugify from 'slugify'
 import { IProductRepository } from '../../../interfaces/repositories/IProductRepository'
-import { Product } from '../../../domain/Product'
+import type { Product } from '../../../domain/Product'
 import { UpdateProductDTO } from '../../dtos/product.dto'
 
 export class UpdateProductUseCase {
