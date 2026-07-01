@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { createApp } from './app'
-import { connectDB } from './lib/db'
+import { connectDB } from './infrastructure/config/db'
 
 const PORT = process.env.PORT || 4000
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/marketplace'
