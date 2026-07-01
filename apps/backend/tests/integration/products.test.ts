@@ -82,9 +82,9 @@ describe('POST /api/products', () => {
 })
 
 describe('GET /api/products/:slug', () => {
-  test('returns 500 for non-existent slug', async () => {
+  test('returns 404 for non-existent slug', async () => {
     const res = await request(app).get('/api/products/nonexistent-slug')
-    expect(res.status).toBe(500)
+    expect(res.status).toBe(404)
   })
 
   test('returns product by slug', async () => {
@@ -134,11 +134,11 @@ describe('POST /api/auth/login', () => {
     expect(res.body).toHaveProperty('user')
   })
 
-  test('returns 500 on invalid credentials', async () => {
+  test('returns 401 on invalid credentials', async () => {
     const res = await request(app).post('/api/auth/login').send({
       email: 'nonexistent@test.com',
       password: 'wrongpassword',
     })
-    expect(res.status).toBe(500)
+    expect(res.status).toBe(401)
   })
 })

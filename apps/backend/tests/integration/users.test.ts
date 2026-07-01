@@ -74,9 +74,9 @@ describe('GET /api/users/:id', () => {
     expect(res.body).not.toHaveProperty('passwordHash')
   })
 
-  test('returns 500 for non-existent user id', async () => {
+  test('returns 404 for non-existent user id', async () => {
     const token = await getAdminToken()
     const res = await request(app).get('/api/users/000000000000000000000000').set('Authorization', `Bearer ${token}`)
-    expect(res.status).toBe(500)
+    expect(res.status).toBe(404)
   })
 })

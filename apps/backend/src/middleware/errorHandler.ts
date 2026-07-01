@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
+import { NotFoundError, AuthError, ValidationError } from '../domain/errors'
 
 export function errorHandler(
   err: unknown,
@@ -9,6 +10,18 @@ export function errorHandler(
 ): void {
   if (err instanceof ZodError) {
     res.status(400).json({ errors: err.errors })
+    return
+  }
+  if (err instanceof ValidationError) {
+    res.status(400).json({ message: err.message })
+    return
+  }
+  if (err instanceof AuthError) {
+    res.status(401).json({ message: err.message })
+    return
+  }
+  if (err instanceof NotFoundError) {
+    res.status(404).json({ message: err.message })
     return
   }
   if (err instanceof Error) {
