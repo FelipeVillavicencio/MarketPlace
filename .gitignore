@@ -5,3 +5,4 @@ dist/
 .env.local
 *.env
 .turbo/
+package-lock.json

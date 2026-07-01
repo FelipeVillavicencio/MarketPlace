@@ -10,9 +10,8 @@
   "devDependencies": {
     "turbo": "latest"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "packageManager": "npm@10.9.2"
+  "packageManager": "pnpm@10.22.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "mongodb-memory-server", "sharp", "unrs-resolver"]
+  }
 }
