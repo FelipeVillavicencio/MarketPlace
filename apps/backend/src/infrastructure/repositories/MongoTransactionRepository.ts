@@ -1,13 +1,24 @@
+import { Types } from 'mongoose'
 import { ITransactionRepository, TransactionFilters } from '../../interfaces/repositories/ITransactionRepository'
 import { Transaction, TransactionStatus } from '../../domain/Transaction'
 import { TransactionModel } from '../models/TransactionModel'
 
-function toTransaction(doc: any): Transaction {
+interface TransactionLean {
+  _id: Types.ObjectId
+  orderNumber: string
+  customer: { name: string; email: string }
+  items: Array<{ productId: Types.ObjectId; name: string; price: number; quantity: number }>
+  total: number
+  status: TransactionStatus
+  createdAt?: Date
+}
+
+function toTransaction(doc: TransactionLean): Transaction {
   return new Transaction({
     _id: doc._id.toString(),
     orderNumber: doc.orderNumber,
     customer: doc.customer,
-    items: doc.items.map((i: any) => ({
+    items: doc.items.map((i: { productId: Types.ObjectId; name: string; price: number; quantity: number }) => ({
       productId: i.productId.toString(),
       name: i.name,
       price: i.price,
@@ -21,12 +32,12 @@ function toTransaction(doc: any): Transaction {
 export class MongoTransactionRepository implements ITransactionRepository {
   async create(transaction: Transaction): Promise<Transaction> {
     const doc = await TransactionModel.create(transaction)
-    return toTransaction(doc)
+    return toTransaction(doc as unknown as TransactionLean)
   }
 
   async findById(id: string): Promise<Transaction | null> {
     const doc = await TransactionModel.findById(id).lean()
-    return doc ? toTransaction(doc) : null
+    return doc ? toTransaction(doc as unknown as TransactionLean) : null
   }
 
   async findAll(filters: TransactionFilters): Promise<{ data: Transaction[]; total: number }> {
@@ -39,11 +50,11 @@ export class MongoTransactionRepository implements ITransactionRepository {
       TransactionModel.find(query).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
       TransactionModel.countDocuments(query),
     ])
-    return { data: docs.map(toTransaction), total }
+    return { data: (docs as unknown as TransactionLean[]).map(toTransaction), total }
   }
 
   async updateStatus(id: string, status: TransactionStatus): Promise<Transaction | null> {
     const doc = await TransactionModel.findByIdAndUpdate(id, { status }, { new: true }).lean()
-    return doc ? toTransaction(doc) : null
+    return doc ? toTransaction(doc as unknown as TransactionLean) : null
   }
 }

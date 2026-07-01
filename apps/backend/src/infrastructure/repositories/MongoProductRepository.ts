@@ -1,8 +1,25 @@
+import slugify from 'slugify'
+import { Types } from 'mongoose'
 import { IProductRepository, ProductFilters, PaginatedResult } from '../../interfaces/repositories/IProductRepository'
 import { Product } from '../../domain/Product'
 import { ProductModel } from '../models/ProductModel'
 
-function toProduct(doc: any): Product {
+interface ProductLean {
+  _id: Types.ObjectId
+  name: string
+  slug: string
+  description: string
+  price: number
+  stock: number
+  category: string
+  attributes: Map<string, string> | Record<string, string>
+  images: string[]
+  active: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+function toProduct(doc: ProductLean): Product {
   return new Product({
     _id: doc._id.toString(),
     name: doc.name,
@@ -27,12 +44,12 @@ export class MongoProductRepository implements IProductRepository {
 
   async findById(id: string): Promise<Product | null> {
     const doc = await ProductModel.findById(id).lean()
-    return doc ? toProduct(doc) : null
+    return doc ? toProduct(doc as unknown as ProductLean) : null
   }
 
   async findBySlug(slug: string): Promise<Product | null> {
     const doc = await ProductModel.findOne({ slug }).lean()
-    return doc ? toProduct(doc) : null
+    return doc ? toProduct(doc as unknown as ProductLean) : null
   }
 
   async findAll(filters: ProductFilters): Promise<PaginatedResult<Product>> {
@@ -49,16 +66,20 @@ export class MongoProductRepository implements IProductRepository {
       ProductModel.countDocuments(query),
     ])
 
-    return { data: docs.map(toProduct), total, page, pages: Math.ceil(total / limit) }
+    return { data: (docs as unknown as ProductLean[]).map(toProduct), total, page, pages: Math.ceil(total / limit) }
   }
 
   async update(id: string, data: Partial<Omit<Product, '_id' | 'createdAt' | 'updatedAt'>>): Promise<Product | null> {
-    const doc = await ProductModel.findByIdAndUpdate(id, data, { new: true }).lean()
-    return doc ? toProduct(doc) : null
+    const updateData: Partial<Omit<Product, '_id' | 'createdAt' | 'updatedAt'>> & { slug?: string } = { ...data }
+    if (updateData.name) {
+      updateData.slug = slugify(updateData.name, { lower: true, strict: true })
+    }
+    const doc = await ProductModel.findByIdAndUpdate(id, updateData, { new: true }).lean()
+    return doc ? toProduct(doc as unknown as ProductLean) : null
   }
 
   async softDelete(id: string): Promise<Product | null> {
     const doc = await ProductModel.findByIdAndUpdate(id, { active: false }, { new: true }).lean()
-    return doc ? toProduct(doc) : null
+    return doc ? toProduct(doc as unknown as ProductLean) : null
   }
 }

@@ -1,8 +1,19 @@
+import { Types } from 'mongoose'
 import { IUserRepository, UserFilters } from '../../interfaces/repositories/IUserRepository'
-import { User } from '../../domain/User'
+import { User, UserRole } from '../../domain/User'
 import { UserModel } from '../models/UserModel'
 
-function toUser(doc: any): User {
+interface UserLean {
+  _id: Types.ObjectId
+  name: string
+  email: string
+  passwordHash: string
+  role: UserRole
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+function toUser(doc: UserLean): User {
   return new User({
     _id: doc._id.toString(),
     name: doc.name,
@@ -17,17 +28,17 @@ function toUser(doc: any): User {
 export class MongoUserRepository implements IUserRepository {
   async create(user: User): Promise<User> {
     const doc = await UserModel.create(user)
-    return toUser(doc)
+    return toUser(doc as unknown as UserLean)
   }
 
   async findById(id: string): Promise<User | null> {
     const doc = await UserModel.findById(id).lean()
-    return doc ? toUser(doc) : null
+    return doc ? toUser(doc as unknown as UserLean) : null
   }
 
   async findByEmail(email: string): Promise<User | null> {
     const doc = await UserModel.findOne({ email: email.toLowerCase() }).lean()
-    return doc ? toUser(doc) : null
+    return doc ? toUser(doc as unknown as UserLean) : null
   }
 
   async findAll(filters: UserFilters): Promise<{ data: User[]; total: number }> {
@@ -37,12 +48,12 @@ export class MongoUserRepository implements IUserRepository {
       UserModel.find().skip((page - 1) * limit).limit(limit).lean(),
       UserModel.countDocuments(),
     ])
-    return { data: docs.map(toUser), total }
+    return { data: (docs as unknown as UserLean[]).map(toUser), total }
   }
 
   async update(id: string, data: Partial<Omit<User, '_id' | 'createdAt' | 'updatedAt'>>): Promise<User | null> {
     const doc = await UserModel.findByIdAndUpdate(id, data, { new: true }).lean()
-    return doc ? toUser(doc) : null
+    return doc ? toUser(doc as unknown as UserLean) : null
   }
 
   async delete(id: string): Promise<boolean> {
