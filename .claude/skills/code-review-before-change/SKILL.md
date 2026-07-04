@@ -28,6 +28,8 @@ Antes de tocar nada, evaluá el impacto del cambio en el proyecto:
 - **Arquitectura**: ¿el cambio es coherente con los patrones del proyecto (estructura de carpetas, naming conventions, separación de responsabilidades)?
 - **Tests**: ¿hay tests existentes que podrían romperse? ¿el cambio requiere nuevos tests?
 - **Contratos**: ¿cambia alguna interfaz, tipo, firma de función o API que otros módulos consumen?
+- **Duplicación y código muerto**: ¿el cambio duplica lógica que ya existe en otro archivo o capa? ¿deja imports, funciones, variables, o archivos sin usar? Señalá cualquier duplicación o código muerto que detectes en el área que estás tocando, aunque no sea parte directa de lo que te pidieron.
+- **Arquitectura limpia**: ¿el cambio respeta la separación de capas/responsabilidades del proyecto (ej. domain no depende de infra, controllers no contienen lógica de negocio)? No agregues código espagueti: evitá anidamiento excesivo, funciones que hacen demasiadas cosas, o lógica de negocio filtrada entre capas. Si hace falta una excepción puntual, resolvé la causa raíz en la capa correcta en vez de parchar.
 
 ### Paso 4 — Explicación breve antes de aplicar
 Antes de mostrar o aplicar el código nuevo, presentá un resumen técnico breve con este formato:
