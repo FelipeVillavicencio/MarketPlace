@@ -6,6 +6,7 @@ import { GetUsersUseCase } from '../../application/use-cases/users/GetUsers'
 import { GetUserByIdUseCase } from '../../application/use-cases/users/GetUserById'
 import { UpdateUserUseCase } from '../../application/use-cases/users/UpdateUser'
 import { DeleteUserUseCase } from '../../application/use-cases/users/DeleteUser'
+import { toSafeUser } from '../../domain/User'
 
 export class UserController {
   private repo() {
@@ -17,7 +18,7 @@ export class UserController {
       const { page, limit } = req.query as Record<string, string | undefined>
       const useCase = new GetUsersUseCase(this.repo())
       const result = await useCase.execute(page ? Number(page) : undefined, limit ? Number(limit) : undefined)
-      res.json(result)
+      res.json({ ...result, data: result.data.map(toSafeUser) })
     } catch (err) {
       next(err)
     }
@@ -27,8 +28,7 @@ export class UserController {
     try {
       const useCase = new GetUserByIdUseCase(this.repo())
       const user = await useCase.execute(req.params.id)
-      const { passwordHash: _pw, ...userWithoutPassword } = user
-      res.json(userWithoutPassword)
+      res.json(toSafeUser(user))
     } catch (err) {
       next(err)
     }
@@ -40,8 +40,7 @@ export class UserController {
       const authService = new AuthService(userRepo)
       const useCase = new CreateUserUseCase(userRepo, authService)
       const user = await useCase.execute(req.body)
-      const { passwordHash: _pw, ...userWithoutPassword } = user
-      res.status(201).json(userWithoutPassword)
+      res.status(201).json(toSafeUser(user))
     } catch (err) {
       next(err)
     }
@@ -51,8 +50,7 @@ export class UserController {
     try {
       const useCase = new UpdateUserUseCase(this.repo())
       const user = await useCase.execute(req.params.id, req.body)
-      const { passwordHash: _pw, ...userWithoutPassword } = user
-      res.json(userWithoutPassword)
+      res.json(toSafeUser(user))
     } catch (err) {
       next(err)
     }
