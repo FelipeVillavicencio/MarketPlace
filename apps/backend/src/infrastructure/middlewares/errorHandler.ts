@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
-import { NotFoundError, AuthError, ValidationError } from '../domain/errors'
+import { NotFoundError, AuthError, ValidationError } from '../../domain/errors'
 
 export function errorHandler(
   err: unknown,
