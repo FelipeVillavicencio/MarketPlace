@@ -56,6 +56,15 @@ describe('GET /api/users', () => {
     expect(res.body).toHaveProperty('data')
     expect(res.body).toHaveProperty('total')
   })
+
+  test('does not leak passwordHash in the users list', async () => {
+    const token = await getAdminToken()
+    const res = await request(app).get('/api/users').set('Authorization', `Bearer ${token}`)
+    expect(res.body.data.length).toBeGreaterThan(0)
+    for (const user of res.body.data) {
+      expect(user).not.toHaveProperty('passwordHash')
+    }
+  })
 })
 
 describe('GET /api/users/:id', () => {

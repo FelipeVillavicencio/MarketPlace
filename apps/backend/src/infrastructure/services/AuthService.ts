@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { IAuthService, AuthPayload } from '../../interfaces/services/IAuthService'
 import { IUserRepository } from '../../interfaces/repositories/IUserRepository'
 import { AuthError } from '../../domain/errors'
+import { toSafeUser } from '../../domain/User'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme'
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
@@ -26,8 +27,7 @@ export class AuthService implements IAuthService {
       expiresIn: JWT_EXPIRES_IN,
     } as jwt.SignOptions)
 
-    const { passwordHash: _pw, ...userWithoutPassword } = user
-    return { token, user: userWithoutPassword }
+    return { token, user: toSafeUser(user) }
   }
 
   async verifyToken(token: string): Promise<{ id: string; role: string }> {
