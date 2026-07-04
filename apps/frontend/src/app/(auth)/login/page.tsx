@@ -16,12 +16,16 @@ export default function LoginPage() {
   })
 
   async function onSubmit(data: LoginInput) {
-    const result = await signIn('credentials', { ...data, redirect: false })
-    if (result?.error) {
-      setError('root', { message: 'Credenciales incorrectas' })
-      return
+    try {
+      const result = await signIn('credentials', { ...data, redirect: false })
+      if (result?.error) {
+        setError('root', { message: 'Credenciales incorrectas' })
+        return
+      }
+      router.push('/admin')
+    } catch {
+      setError('root', { message: 'Error de red, intentá nuevamente' })
     }
-    router.push('/admin')
   }
 
   return (
