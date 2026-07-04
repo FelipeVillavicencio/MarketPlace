@@ -2,6 +2,7 @@ import { Types } from 'mongoose'
 import { IUserRepository, UserFilters } from '../../interfaces/repositories/IUserRepository'
 import { User, UserRole } from '../../domain/User'
 import { UserModel } from '../models/UserModel'
+import { paginate } from './pagination'
 
 interface UserLean {
   _id: Types.ObjectId
@@ -42,10 +43,9 @@ export class MongoUserRepository implements IUserRepository {
   }
 
   async findAll(filters: UserFilters): Promise<{ data: User[]; total: number }> {
-    const page = filters.page ?? 1
-    const limit = filters.limit ?? 20
+    const { limit, skip } = paginate(filters.page, filters.limit)
     const [docs, total] = await Promise.all([
-      UserModel.find().skip((page - 1) * limit).limit(limit).lean(),
+      UserModel.find().skip(skip).limit(limit).lean(),
       UserModel.countDocuments(),
     ])
     return { data: (docs as unknown as UserLean[]).map(toUser), total }

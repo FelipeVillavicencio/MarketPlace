@@ -2,6 +2,7 @@ import { Types } from 'mongoose'
 import { ITransactionRepository, TransactionFilters } from '../../interfaces/repositories/ITransactionRepository'
 import { Transaction, TransactionStatus } from '../../domain/Transaction'
 import { TransactionModel } from '../models/TransactionModel'
+import { paginate } from './pagination'
 
 interface TransactionLean {
   _id: Types.ObjectId
@@ -41,13 +42,12 @@ export class MongoTransactionRepository implements ITransactionRepository {
   }
 
   async findAll(filters: TransactionFilters): Promise<{ data: Transaction[]; total: number }> {
-    const page = filters.page ?? 1
-    const limit = filters.limit ?? 20
+    const { limit, skip } = paginate(filters.page, filters.limit)
     const query: Record<string, unknown> = {}
     if (filters.status) query.status = filters.status
 
     const [docs, total] = await Promise.all([
-      TransactionModel.find(query).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      TransactionModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       TransactionModel.countDocuments(query),
     ])
     return { data: (docs as unknown as TransactionLean[]).map(toTransaction), total }

@@ -1,8 +1,9 @@
-import slugify from 'slugify'
 import { Types } from 'mongoose'
 import { IProductRepository, ProductFilters, PaginatedResult } from '../../interfaces/repositories/IProductRepository'
 import { Product } from '../../domain/Product'
 import { ProductModel } from '../models/ProductModel'
+import { toSlug } from '../../application/shared/slug'
+import { paginate } from './pagination'
 
 interface ProductLean {
   _id: Types.ObjectId
@@ -53,8 +54,7 @@ export class MongoProductRepository implements IProductRepository {
   }
 
   async findAll(filters: ProductFilters): Promise<PaginatedResult<Product>> {
-    const page = filters.page ?? 1
-    const limit = filters.limit ?? 20
+    const { page, limit, skip } = paginate(filters.page, filters.limit)
     const query: Record<string, unknown> = {}
 
     if (filters.active !== undefined) query.active = filters.active
@@ -62,7 +62,7 @@ export class MongoProductRepository implements IProductRepository {
     if (filters.search) query.name = { $regex: filters.search, $options: 'i' }
 
     const [docs, total] = await Promise.all([
-      ProductModel.find(query).skip((page - 1) * limit).limit(limit).lean(),
+      ProductModel.find(query).skip(skip).limit(limit).lean(),
       ProductModel.countDocuments(query),
     ])
 
@@ -72,7 +72,7 @@ export class MongoProductRepository implements IProductRepository {
   async update(id: string, data: Partial<Omit<Product, '_id' | 'createdAt' | 'updatedAt'>>): Promise<Product | null> {
     const updateData: Partial<Omit<Product, '_id' | 'createdAt' | 'updatedAt'>> & { slug?: string } = { ...data }
     if (updateData.name) {
-      updateData.slug = slugify(updateData.name, { lower: true, strict: true })
+      updateData.slug = toSlug(updateData.name)
     }
     const doc = await ProductModel.findByIdAndUpdate(id, updateData, { new: true }).lean()
     return doc ? toProduct(doc as unknown as ProductLean) : null
