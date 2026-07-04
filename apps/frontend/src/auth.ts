@@ -12,9 +12,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(parsed.data),
-        })
-        if (!res.ok) return null
-        const { token, user } = await res.json()
+        }).catch(() => null)
+        if (!res || !res.ok) return null
+        const body = await res.json().catch(() => null)
+        if (!body) return null
+        const { token, user } = body
         return { ...user, accessToken: token }
       },
     }),
