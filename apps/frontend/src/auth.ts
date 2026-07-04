@@ -2,6 +2,8 @@ import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { loginSchema } from '@marketplace/shared'
 
+type AuthUser = { accessToken: string; role: string }
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
@@ -24,8 +26,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.accessToken = (user as typeof user & { accessToken: string }).accessToken
-        token.role = (user as typeof user & { role: string }).role
+        const authUser = user as typeof user & AuthUser
+        token.accessToken = authUser.accessToken
+        token.role = authUser.role
       }
       return token
     },
