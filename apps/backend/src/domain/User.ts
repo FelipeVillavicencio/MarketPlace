@@ -30,3 +30,8 @@ export class User {
     this.updatedAt = data.updatedAt
   }
 }
+
+export function toSafeUser(user: User): Omit<User, 'passwordHash'> {
+  const { passwordHash: _pw, ...safeUser } = user
+  return safeUser
+}

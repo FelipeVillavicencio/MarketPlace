@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
-import { errorHandler } from './middleware/errorHandler'
+import { errorHandler } from './infrastructure/middlewares/errorHandler'
 import authRouter from './infrastructure/routes/auth'
 import productsRouter from './infrastructure/routes/products'
 import usersRouter from './infrastructure/routes/users'

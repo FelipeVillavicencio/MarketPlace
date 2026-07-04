@@ -1,17 +1,14 @@
-import mongoose from 'mongoose'
-import dotenv from 'dotenv'
+import 'dotenv/config'
+import { connectDB, disconnectDB } from '../config/db'
 import { MongoUserRepository } from '../repositories/MongoUserRepository'
 import { MongoProductRepository } from '../repositories/MongoProductRepository'
 import { AuthService } from '../services/AuthService'
 import { CreateUserUseCase } from '../../application/use-cases/users/CreateUser'
 import { CreateProductUseCase } from '../../application/use-cases/products/CreateProduct'
 
-dotenv.config()
-
 async function seed(): Promise<void> {
-  const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/marketplace'
-  await mongoose.connect(MONGO_URI)
-  console.log('Connected to MongoDB')
+  const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/marketplace'
+  await connectDB(MONGODB_URI)
 
   const userRepo = new MongoUserRepository()
   const productRepo = new MongoProductRepository()
@@ -69,7 +66,7 @@ async function seed(): Promise<void> {
     }
   }
 
-  await mongoose.disconnect()
+  await disconnectDB()
   console.log('Seed complete')
 }
 

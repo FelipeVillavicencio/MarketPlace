@@ -4,6 +4,7 @@ import { MongoUserRepository } from '../repositories/MongoUserRepository'
 import { CreateUserUseCase } from '../../application/use-cases/users/CreateUser'
 import { GetUserByIdUseCase } from '../../application/use-cases/users/GetUserById'
 import { AuthRequest } from '../middlewares/auth'
+import { toSafeUser } from '../../domain/User'
 
 const userRepo = new MongoUserRepository()
 const authService = new AuthService(userRepo)
@@ -20,8 +21,7 @@ export class AuthController {
         role?: 'admin' | 'customer'
       }
       const user = await createUser.execute({ name, email, password, role })
-      const { passwordHash: _pw, ...userWithoutPassword } = user
-      res.status(201).json(userWithoutPassword)
+      res.status(201).json(toSafeUser(user))
     } catch (err) {
       next(err)
     }
@@ -40,8 +40,7 @@ export class AuthController {
   me = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = await getUserById.execute(req.userId!)
-      const { passwordHash: _pw, ...userWithoutPassword } = user
-      res.json(userWithoutPassword)
+      res.json(toSafeUser(user))
     } catch (err) {
       next(err)
     }
