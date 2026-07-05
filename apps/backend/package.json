@@ -5,7 +5,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "seed": "tsx src/infrastructure/scripts/seed.ts"
   },
   "dependencies": {
     "@marketplace/shared": "workspace:*",
