@@ -22,23 +22,27 @@ interface Props {
 
 export function ProductForm({ token, defaultValues, productId }: Props) {
   const router = useRouter()
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ProductFormValues>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<ProductFormValues, unknown, CreateProductInput>({
     resolver: zodResolver(createProductSchema),
     defaultValues,
   })
 
   async function onSubmit(data: CreateProductInput) {
-    if (productId) {
-      await apiFetch(`/api/products/${productId}`, { method: 'PUT', body: JSON.stringify(data), token })
-    } else {
-      await apiFetch('/api/products', { method: 'POST', body: JSON.stringify(data), token })
+    try {
+      if (productId) {
+        await apiFetch(`/api/products/${productId}`, { method: 'PUT', body: JSON.stringify(data), token })
+      } else {
+        await apiFetch('/api/products', { method: 'POST', body: JSON.stringify(data), token })
+      }
+      router.push('/admin/products')
+      router.refresh()
+    } catch (err) {
+      setError('root', { message: err instanceof Error ? err.message : 'Error al guardar el producto' })
     }
-    router.push('/admin/products')
-    router.refresh()
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit as (data: ProductFormValues) => void)} className="space-y-4 max-w-lg">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg">
       {[
         { name: 'name', label: 'Nombre', type: 'text' },
         { name: 'description', label: 'Descripción', type: 'text' },
@@ -58,6 +62,7 @@ export function ProductForm({ token, defaultValues, productId }: Props) {
           )}
         </div>
       ))}
+      {errors.root && <p className="text-sm text-red-500">{errors.root.message}</p>}
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Guardando...' : productId ? 'Actualizar' : 'Crear producto'}
       </Button>
