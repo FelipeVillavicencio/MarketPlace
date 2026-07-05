@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { MongoProductRepository } from '../repositories/MongoProductRepository'
 import { CreateProductUseCase } from '../../application/use-cases/products/CreateProduct'
 import { GetProductsUseCase } from '../../application/use-cases/products/GetProducts'
-import { GetProductBySlugUseCase } from '../../application/use-cases/products/GetProductBySlug'
+import { GetProductUseCase } from '../../application/use-cases/products/GetProduct'
 import { UpdateProductUseCase } from '../../application/use-cases/products/UpdateProduct'
 import { DeleteProductUseCase } from '../../application/use-cases/products/DeleteProduct'
 
@@ -28,10 +28,10 @@ export class ProductController {
     }
   }
 
-  getBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getOne = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const useCase = new GetProductBySlugUseCase(this.repo())
-      const product = await useCase.execute(req.params.slug)
+      const useCase = new GetProductUseCase(this.repo())
+      const product = await useCase.execute(req.params.identifier)
       res.json(product)
     } catch (err) {
       next(err)
