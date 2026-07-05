@@ -105,6 +105,38 @@ describe('GET /api/products/:slug', () => {
   })
 })
 
+describe('GET /api/products/:id (admin lookup by Mongo id)', () => {
+  test('returns an inactive product by id, unlike the slug path', async () => {
+    const token = await getAdminToken()
+    const createRes = await request(app)
+      .post('/api/products')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'Discontinued Item',
+        description: 'A product',
+        price: 25,
+        stock: 0,
+        category: 'misc',
+      })
+    const id = createRes.body._id
+
+    await request(app).delete(`/api/products/${id}`).set('Authorization', `Bearer ${token}`)
+
+    const bySlug = await request(app).get('/api/products/discontinued-item')
+    expect(bySlug.status).toBe(404)
+
+    const byId = await request(app).get(`/api/products/${id}`)
+    expect(byId.status).toBe(200)
+    expect(byId.body._id).toBe(id)
+    expect(byId.body.active).toBe(false)
+  })
+
+  test('returns 404 for a well-formed id that does not exist', async () => {
+    const res = await request(app).get('/api/products/000000000000000000000000')
+    expect(res.status).toBe(404)
+  })
+})
+
 describe('POST /api/auth/register', () => {
   test('registers a new user', async () => {
     const res = await request(app).post('/api/auth/register').send({
